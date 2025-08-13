@@ -1341,12 +1341,12 @@
   resolved "https://registry.npmjs.org/@gluestack-ui/alert/-/alert-0.1.15.tgz"
   integrity sha512-Jlaz8awVHznQixVfc1WmO9C1Em7DuF23N44PVOiGe2fCotOOB68ru2cGggaqGlHDzqhPRVpP5Fls+gn8CRDf0Q==
 
-"@gluestack-ui/avatar@^0.1.17":
-  version "0.1.17"
-  resolved "https://registry.yarnpkg.com/@gluestack-ui/avatar/-/avatar-0.1.17.tgz#7657defaa103c72c02fd57300bc79dc93ea47b77"
-  integrity sha512-L7R3GVjYK6o+tdCiCDZXvHjPi1FKwt9XAFHGlEsQ4dX6Qe7yWEi3K+e5UBpS1ugvja7SmNS+YZwvr+nnVcmohQ==
+"@gluestack-ui/avatar@^0.1.18":
+  version "0.1.18"
+  resolved "https://registry.yarnpkg.com/@gluestack-ui/avatar/-/avatar-0.1.18.tgz#bb890a7b889060e01faf549f59a47d11c04ada1c"
+  integrity sha512-VA9XwtavYLYCWrjxHc2u9gRpV97cPRcr/6KJ4tLiMiQbiRL1b4zckiL+/F39fB6xjUOUQHl3Fjo/Yd8swa0MBg==
   dependencies:
-    "@gluestack-ui/utils" "^0.1.12"
+    "@gluestack-ui/utils" "^0.1.14"
 
 "@gluestack-ui/button@^1.0.7":
   version "1.0.7"
@@ -1626,6 +1626,13 @@
   version "0.1.13"
   resolved "https://registry.npmjs.org/@gluestack-ui/utils/-/utils-0.1.13.tgz"
   integrity sha512-L9+ddAn5FLtNJYut7KBGChelt+SvDW3C+6dXduZyP9DD1BoDVTRVwPVYblvbefZf2ZOdTALtHIIO3n/n1bWlbg==
+  dependencies:
+    "@react-native-aria/focus" "^0.2.9"
+
+"@gluestack-ui/utils@^0.1.14":
+  version "0.1.15"
+  resolved "https://registry.yarnpkg.com/@gluestack-ui/utils/-/utils-0.1.15.tgz#55f318d81d230daca40b498039eb4680600faa90"
+  integrity sha512-LRBMv+tr+bV4falMYS2zSt94PxL0vpvUN6F9d6oTqOYKhkiAkU6k2ROfNlT323m0CoTQto1LkJhPxULisQ2oeQ==
   dependencies:
     "@react-native-aria/focus" "^0.2.9"
 
@@ -5584,6 +5591,11 @@ expo-asset@~10.0.10:
     expo-constants "~16.0.0"
     invariant "^2.2.4"
     md5-file "^3.2.3"
+
+expo-blur@~13.0.3:
+  version "13.0.3"
+  resolved "https://registry.yarnpkg.com/expo-blur/-/expo-blur-13.0.3.tgz#f150f396ce8d0aac95587bc84806abf63ba2e2ba"
+  integrity sha512-z5W9ZGlG6ZiRLuoJZG1AHRvjK8j+2+nc/mtvEtyAa8T/8iTNpUnX4eC8xXDoTL/H4y2pc3cHvytDjCXJG26pcQ==
 
 expo-constants@~16.0.0:
   version "16.0.2"

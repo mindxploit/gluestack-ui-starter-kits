@@ -9,7 +9,6 @@ import {
   withStyleContext,
   useStyleContext,
 } from '@gluestack-ui/nativewind-utils/withStyleContext';
-import { cssInterop } from 'nativewind';
 const SCOPE = 'AVATAR';
 import type { VariantProps } from '@gluestack-ui/nativewind-utils';
 
@@ -20,12 +19,6 @@ const UIAvatar = createAvatar({
   Image: Image,
   FallbackText: Text,
 });
-
-cssInterop(UIAvatar, { className: 'style' });
-cssInterop(UIAvatar.Badge, { className: 'style' });
-cssInterop(UIAvatar.Group, { className: 'style' });
-cssInterop(UIAvatar.Image, { className: 'style' });
-cssInterop(UIAvatar.FallbackText, { className: 'style' });
 
 const avatarStyle = tva({
   base: 'rounded-full justify-center items-center relative bg-primary-600 group-[.avatar-group]/avatar-group:-ml-2.5',
@@ -84,10 +77,10 @@ type IAvatarProps = Omit<
 > &
   VariantProps<typeof avatarStyle>;
 
-export const Avatar = React.forwardRef<
-  React.ElementRef<typeof UIAvatar>,
+const Avatar = React.forwardRef<
+  React.ComponentRef<typeof UIAvatar>,
   IAvatarProps
->(({ className, size = 'md', ...props }, ref) => {
+>(function Avatar({ className, size = 'md', ...props }, ref) {
   return (
     <UIAvatar
       ref={ref}
@@ -101,10 +94,10 @@ export const Avatar = React.forwardRef<
 type IAvatarBadgeProps = React.ComponentPropsWithoutRef<typeof UIAvatar.Badge> &
   VariantProps<typeof avatarBadgeStyle>;
 
-export const AvatarBadge = React.forwardRef<
-  React.ElementRef<typeof UIAvatar.Badge>,
+const AvatarBadge = React.forwardRef<
+  React.ComponentRef<typeof UIAvatar.Badge>,
   IAvatarBadgeProps
->(({ className, size, ...props }, ref) => {
+>(function AvatarBadge({ className, size, ...props }, ref) {
   const { size: parentSize } = useStyleContext(SCOPE);
 
   return (
@@ -126,10 +119,10 @@ type IAvatarFallbackTextProps = React.ComponentPropsWithoutRef<
   typeof UIAvatar.FallbackText
 > &
   VariantProps<typeof avatarFallbackTextStyle>;
-export const AvatarFallbackText = React.forwardRef<
-  React.ElementRef<typeof UIAvatar.FallbackText>,
+const AvatarFallbackText = React.forwardRef<
+  React.ComponentRef<typeof UIAvatar.FallbackText>,
   IAvatarFallbackTextProps
->(({ className, size, ...props }, ref) => {
+>(function AvatarFallbackText({ className, size, ...props }, ref) {
   const { size: parentSize } = useStyleContext(SCOPE);
 
   return (
@@ -150,10 +143,10 @@ export const AvatarFallbackText = React.forwardRef<
 type IAvatarImageProps = React.ComponentPropsWithoutRef<typeof UIAvatar.Image> &
   VariantProps<typeof avatarImageStyle>;
 
-export const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof UIAvatar.Image>,
+const AvatarImage = React.forwardRef<
+  React.ComponentRef<typeof UIAvatar.Image>,
   IAvatarImageProps
->(({ className, ...props }, ref) => {
+>(function AvatarImage({ className, ...props }, ref) {
   return (
     <UIAvatar.Image
       ref={ref}
@@ -161,7 +154,7 @@ export const AvatarImage = React.forwardRef<
       className={avatarImageStyle({
         class: className,
       })}
-      // @ts-ignore
+      // @ts-expect-error : This is a workaround to fix the issue with the image style on web.
       style={
         Platform.OS === 'web'
           ? { height: 'revert-layer', width: 'revert-layer' }
@@ -174,10 +167,10 @@ export const AvatarImage = React.forwardRef<
 type IAvatarGroupProps = React.ComponentPropsWithoutRef<typeof UIAvatar.Group> &
   VariantProps<typeof avatarGroupStyle>;
 
-export const AvatarGroup = React.forwardRef<
-  React.ElementRef<typeof UIAvatar.Group>,
+const AvatarGroup = React.forwardRef<
+  React.ComponentRef<typeof UIAvatar.Group>,
   IAvatarGroupProps
->(({ className, ...props }, ref) => {
+>(function AvatarGroup({ className, ...props }, ref) {
   return (
     <UIAvatar.Group
       ref={ref}
@@ -188,3 +181,5 @@ export const AvatarGroup = React.forwardRef<
     />
   );
 });
+
+export { Avatar, AvatarBadge, AvatarFallbackText, AvatarImage, AvatarGroup };
