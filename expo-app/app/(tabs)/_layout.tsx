@@ -4,15 +4,22 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 import { Tabs } from 'expo-router';
 import { BlurView } from 'expo-blur';
+import { StyleSheet } from 'react-native';
 
 export default function TabLayout() {
   return (
     <Tabs screenOptions={{
-      tabBarActiveTintColor: 'purple',
-      // tabBarStyle: {
-      // position: 'absolute',
-      // },
-      // tabBarBackground: () => <BlurView intensity={100} />
+      tabBarActiveTintColor: 'violet',
+      tabBarStyle: {
+        position: 'absolute',
+        borderTopWidth: 0,
+      },
+      tabBarBackground: () => (
+        <BlurView
+          intensity={80}
+          style={StyleSheet.absoluteFill}
+        />
+      )
     }}>
       <Tabs.Screen
         name="index"

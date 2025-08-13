@@ -2,13 +2,15 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Divider } from "@/components/ui/divider";
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
-import { StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { View } from "@/components/ui/view";
 import { Avatar, AvatarFallbackText, AvatarImage, AvatarGroup } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 export default function Tab() {
+  const tabBarHeight = useBottomTabBarHeight();
   const mockAvatars = [
     {
       name: "Liam Johnson",
@@ -30,8 +32,8 @@ export default function Tab() {
   ];
   return (
     <View style={styles.container}>
-      <VStack className="w-full p-5 py-10" space="lg">
-        <Heading size="4xl">Discover your perfect avatar</Heading>
+      <ScrollView className="w-full p-5 py-10">
+        <Heading size="4xl" className="mb-5">Discover your perfect avatar</Heading>
         <VStack space="md">
           <Card size="md" variant="elevated">
             <Heading size="lg" className="mb-1">Fitness</Heading>
@@ -81,7 +83,7 @@ export default function Tab() {
             </AvatarGroup>
           </Card>
         </VStack>
-      </VStack>
+      </ScrollView>
     </View>
   );
 }
