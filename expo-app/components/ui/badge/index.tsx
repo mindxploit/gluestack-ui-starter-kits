@@ -15,6 +15,7 @@ const badgeStyle = tva({
   base: 'flex-row items-center rounded-sm data-[disabled=true]:opacity-50 px-2 py-1',
   variants: {
     action: {
+      neutral: 'bg-background-neutral border-background-200 border-2',
       error: 'bg-background-error border-error-300',
       warning: 'bg-background-warning border-warning-300',
       success: 'bg-background-success border-success-300',

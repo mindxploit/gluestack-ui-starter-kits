@@ -68,6 +68,18 @@ export default function Tab() {
               ))}
             </AvatarGroup>
           </Card>
+
+          <Card size="md" variant="elevated">
+            <Heading size="lg" className="mb-1">Coaching</Heading>
+            <AvatarGroup>
+              {mockAvatars.map((avatar) => (
+                <Avatar size="xl">
+                  <AvatarFallbackText>{avatar.name}</AvatarFallbackText>
+                  <AvatarImage source={{ uri: avatar.image }} />
+                </Avatar>
+              ))}
+            </AvatarGroup>
+          </Card>
         </VStack>
       </VStack>
     </View>

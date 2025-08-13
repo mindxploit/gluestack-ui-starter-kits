@@ -8,11 +8,11 @@ import { BlurView } from 'expo-blur';
 export default function TabLayout() {
   return (
     <Tabs screenOptions={{
-      tabBarStyle: {
-        position: 'absolute',
-      },
       tabBarActiveTintColor: 'purple',
-      tabBarBackground: () => <BlurView intensity={100} tint="light" />
+      // tabBarStyle: {
+      // position: 'absolute',
+      // },
+      // tabBarBackground: () => <BlurView intensity={100} />
     }}>
       <Tabs.Screen
         name="index"
