@@ -97,7 +97,7 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                 >
                   {suggestions.map((suggestion, index) => (
                     // @ts-ignore
-                    <BlurView key={index} intensity={90} style={styles.blurContainer}>
+                    <BlurView intensity={90} style={styles.blurContainer}>
                       <Badge action="neutral" variant="outline" size="lg" className="bg-transparent rounded-full">
                         <BadgeText size="sm">
                           <Text>{suggestion}</Text>
@@ -122,7 +122,7 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
             </Animated.View>
           </KeyboardAvoidingView>
         </Animated.View>
-      </Pressable>
+      </Pressable >
     </View >
   );
 }

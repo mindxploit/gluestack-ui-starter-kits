@@ -1,12 +1,4 @@
-import { Image } from "@/components/ui/image";
-import { Input, InputSlot } from "@/components/ui/input";
-import { InputField } from "@/components/ui/input";
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { BlurView } from "expo-blur";
-import { VStack } from "@/components/ui/vstack";
-import { Badge, BadgeText } from "@/components/ui/badge";
-import { HStack } from "@/components/ui/hstack";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { View, StyleSheet } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { AvatarChat } from "@/components/AvatarChat";
 
