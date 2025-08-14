@@ -19,8 +19,9 @@ import Animated, {
   withSpring,
   ReduceMotion,
 } from 'react-native-reanimated';
-import { Button, ButtonText } from "../ui/button";
-import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Button, ButtonIcon, ButtonText } from "../ui/button";
+import { Directions, Gesture, GestureDetector, GestureEvent, PanGestureHandler, State } from "react-native-gesture-handler";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 
 interface AvatarChatProps {
@@ -34,7 +35,7 @@ interface AvatarChatProps {
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
-  const anim = useSharedValue(0);
+  const anim = useSharedValue(1);
 
   const toggleChat = () => {
     anim.value = anim.value === 0 ? 1 : 0;
@@ -62,27 +63,44 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
 
   const hiddenStyle = useAnimatedStyle(() => {
     const opacity = withTiming(anim.value === 1 ? 1 : 0);
-    const display = withTiming(anim.value === 1 ? 'flex' : 'none');
     return {
       opacity,
-      display,
     };
   });
 
-  const tabBarHeight = useBottomTabBarHeight();
 
-  const flingGesture = Gesture.Tap()
+  const tap = Gesture.Fling()
     .onBegin(() => {
-      console.log('tap started');
-      toggleChat();
-    })
+      anim.value === 0 && toggleChat();
+    }).runOnJS(true);
+
+  const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={toggleChat}>
+      <GestureDetector gesture={tap}>
         <Animated.View style={[styles.chatContainer, chatStyle]}>
-
           <Image alt={avatar.name} source={avatar.video} className="w-full h-full absolute object-cover" />
+
+          <Animated.View className="absolute top-16 left-5" style={hiddenStyle}>
+            <BlurView intensity={90} style={styles.blurContainer}>
+              <Badge action="neutral" variant="solid" size="lg" className="rounded-full">
+                <BadgeText size="lg" className="font-bold">
+                  {avatar.name}
+                </BadgeText>
+              </Badge>
+            </BlurView>
+          </Animated.View>
+
+          <Animated.View className="absolute top-16 right-5" style={hiddenStyle}>
+            <Pressable onPress={toggleChat}>
+              <BlurView intensity={30} style={styles.blurContainer}>
+                <Button variant="solid" size="xs" className="rounded-full bg-transparent opacity-70" onPress={toggleChat}>
+                  <FontAwesome name="chevron-down" size={16} color="white" />
+                </Button>
+              </BlurView>
+            </Pressable>
+          </Animated.View>
 
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -122,8 +140,8 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
             </Animated.View>
           </KeyboardAvoidingView>
         </Animated.View>
-      </Pressable >
-    </View >
+      </GestureDetector>
+    </View>
   );
 }
 
