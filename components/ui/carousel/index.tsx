@@ -7,8 +7,6 @@ import { Box } from "@/components/ui/box";
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Dimensions } from "react-native";
 
-
-
 const defaultDataWith6Colors = [
   "#B0604D",
   "#899F9C",
@@ -18,7 +16,7 @@ const defaultDataWith6Colors = [
   "#F1F1F1",
 ];
 
-const CarouselComponent = () => {
+const CarouselAvatars = () => {
   const { width: windowWidth } = Dimensions.get('window');
 
   const progress = useSharedValue<number>(0);
@@ -42,7 +40,7 @@ const CarouselComponent = () => {
   return (
     <View>
       <Carousel
-        autoPlay={true}
+        // autoPlay={true}
         autoPlayInterval={5000}
         data={[player1, player2, player3, player4]}
         height={350}
@@ -72,4 +70,4 @@ const CarouselComponent = () => {
   );
 }
 
-export default CarouselComponent;
+export default CarouselAvatars;
