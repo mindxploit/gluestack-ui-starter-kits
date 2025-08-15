@@ -39,7 +39,7 @@ export default function Tab() {
       <CarouselAvatars />
 
       <Card size="sm" variant="elevated" className="w-full mt-5 pt-2 pb-5 border border-x-0 border-bottom-0 border-top-1 border-background-100">
-        <Heading size="md" className="mb-4 font-medium text-left opacity-70">Recent conversations</Heading>
+        <Heading size="md" className="mb-4 font-semibold text-left opacity-70">Recent conversations</Heading>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 13 }}>
           {mockAvatars.map((avatar) => (
             <VStack className="items-center" space="xs">
