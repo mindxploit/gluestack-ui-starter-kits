@@ -61,6 +61,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const userId = "1";
 const sessionId = "1754562753365441185";
 const avatarId = "3ddba8f5-0d2c-4932-a172-09986ee12c3c";
+// hardcoded agentica for now
+const clientId = 20
 export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
   const [chat, setChat] = useState<IChat>({ id: 0, avatar_agent_id: "", image: "", name: "", messages: [] });
   const [messageQueue, setMessageQueue] = useState<IChatMessage[]>([]);
@@ -93,7 +95,7 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
     setMessageQueue((prevQueue) => [...prevQueue, { id: uuidv4(), message, sendAt: new Date(), fromMe }]);
   };
   const { onTextSubmit, lastMessageId } = useWebsocket(userId, avatarId, sessionId, setChat, addMessageToChat, addMessageToQueue);
-  const { remoteStream, isStreaming, isConnecting, streamTextResponse, isAudioMuted, setupStream } = useStreamWebRTC(Number(avatarId), sessionId);
+  const { remoteStream, isStreaming, isConnecting, streamTextResponse, isAudioMuted, setupStream } = useStreamWebRTC(clientId, sessionId);
 
   useEffect(() => {
     if (lastMessageId) {
