@@ -3,7 +3,6 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { AvatarChat } from "@/components/AvatarChat";
 
 export default function Tab() {
-  const tabBarHeight = useBottomTabBarHeight();
   const avatar = {
     name: 'Jesus',
     description: 'The Son of God',

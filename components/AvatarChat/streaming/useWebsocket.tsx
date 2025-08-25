@@ -48,11 +48,14 @@ const useWebsocket = (
       return;
     }
 
-    // Close existing connection before creating new one -- could be removed?
-    // websocket.current?.close();
-    // if (websocket.current && websocket.current.readyState === WebSocket.OPEN) {
-    //   return
-    // }
+    // Properly close existing connection
+    if (websocket.current) {
+      if (websocket.current.readyState === WebSocket.OPEN ||
+        websocket.current.readyState === WebSocket.CONNECTING) {
+        websocket.current.close(1000, "New connection");
+      }
+      websocket.current = null;
+    }
 
     // Create new socket connection
     websocket.current = new WebSocket(socketUrl);
@@ -89,43 +92,7 @@ const useWebsocket = (
       // Handle text response from agent
       if (messageFromServer.mime_type === "text/plain/output") {
         console.log("📝 [Socket] Agent response:", messageFromServer.data);
-
-        // Handle video mode (queue messages)
         addMessageToQueue(messageFromServer.data, false);
-        // Handle text mode (stream messages)
-        // setMessages((prevChat: IChat) => {
-        //   const lastMessage = prevChat.messages[prevChat.messages.length - 1];
-
-        //   // Append to last message if it's from agent
-        //   if (lastMessage && lastMessage.fromMe === false) {
-        //     return {
-        //       ...prevChat,
-        //       messages: prevChat.messages.map((message: IChatMessage, index: number) => {
-        //         if (index === prevChat.messages.length - 1) {
-        //           return {
-        //             ...message,
-        //             message: message.message + messageFromServer.data,
-        //           };
-        //         }
-        //         return message;
-        //       }),
-        //     };
-        //   } else {
-        //     // Create new message from agent
-        //     return {
-        //       ...prevChat,
-        //       messages: [
-        //         ...prevChat.messages,
-        //         {
-        //           id: messageFromServer.id_msg,
-        //           message: messageFromServer.data,
-        //           fromMe: false,
-        //           sendAt: new Date(),
-        //         },
-        //       ],
-        //     };
-        //   }
-        // });
       }
     };
 
@@ -141,7 +108,7 @@ const useWebsocket = (
     if (sessionId && agentId) {
       connectSocket();
     }
-  }, [sessionId, agentId, connectSocket]);
+  }, [sessionId, agentId]);
 
   // Send text message
   const onTextSubmit = useCallback((message: string) => {

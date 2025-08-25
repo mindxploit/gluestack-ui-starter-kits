@@ -26,6 +26,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWebsocket } from "./streaming/useWebsocket";
 import { v4 as uuidv4 } from 'uuid';
+import * as Animatable from 'react-native-animatable';
 
 
 
@@ -149,8 +150,8 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
 
           <Animated.View style={hiddenStyle}>
             <VStack space="md" className="w-full px-4 pb-4" style={{ marginBottom: tabBarHeight, justifyContent: 'center', height: heightWithoutTabBar }}>
-              <HStack className="justify-between">
-                <Animated.View style={[hiddenStyle, { marginTop: insets.top }]}>
+              <HStack className="justify-between" style={{ marginTop: insets.top }}>
+                <Animated.View style={[hiddenStyle]}>
                   <BlurView intensity={90} style={styles.blurContainer}>
                     <Badge action="neutral" variant="solid" size="lg" className="rounded-full">
                       <BadgeText size="lg" className="font-bold">
@@ -160,7 +161,7 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                   </BlurView>
                 </Animated.View>
 
-                <Animated.View style={[hiddenStyle, { marginTop: insets.top }]}>
+                <Animated.View style={[hiddenStyle]}>
                   <Pressable onPress={toggleChat}>
                     <BlurView intensity={30} style={styles.blurContainer}>
                       <Button variant="solid" size="xs" className="rounded-full bg-transparent opacity-70" onPress={toggleChat}>
@@ -170,20 +171,22 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                   </Pressable>
                 </Animated.View>
               </HStack>
-              {messageQueue.length > 0 && (
-                <BlurView intensity={90} style={[styles.blurContainer, { alignSelf: "center", justifyContent: "center" }]}>
-                  <Badge action="neutral" variant="solid" size="lg" className="rounded-full bg-transparent">
-                    <BadgeText size="lg" className="font-bold">
-                      {messageQueue[messageQueue.length - 1]?.message}
-                    </BadgeText>
-                  </Badge>
-                </BlurView>
-              )}
               <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'position' : 'height'}
                 keyboardVerticalOffset={0}
               >
                 <VStack style={{ height: heightWithoutInsets }} space="md" className="pb-2">
+                  {messageQueue.length > 0 && (
+                    <Animatable.View style={styles.messageQueue} animation="fadeIn" key={messageQueue.slice(-1)[0]?.id} duration={800}>
+                      <BlurView intensity={90} style={[styles.blurContainer]}>
+                        <Badge action="neutral" variant="solid" size="lg" className="rounded-full bg-transparent">
+                          <BadgeText size="lg" className="font-bold">
+                            {messageQueue.slice(-1)[0]?.message}
+                          </BadgeText>
+                        </Badge>
+                      </BlurView>
+                    </Animatable.View>
+                  )}
                   <ScrollView
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
@@ -206,7 +209,10 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                     <Input variant="rounded" size="xl" isDisabled={false} isInvalid={false} isReadOnly={false} className="border-background-300">
                       <InputField
                         placeholder='Ask me anything...'
-                        onSubmitEditing={() => onTextSubmit(inputValue)}
+                        onSubmitEditing={() => {
+                          onTextSubmit(inputValue)
+                          setInputValue("")
+                        }}
                         onChangeText={(text) => setInputValue(text)}
                         value={inputValue}
                       />
@@ -243,4 +249,11 @@ const styles = StyleSheet.create({
   chatContainer: {
     overflow: 'hidden',
   },
+  messageQueue: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'none',
+    marginTop: 230,
+  }
 });
