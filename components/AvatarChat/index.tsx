@@ -288,6 +288,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     pointerEvents: 'none',
-    marginTop: 230,
+    marginTop: 430,
   }
 });

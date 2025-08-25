@@ -87,39 +87,49 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
       });
 
       // Handle incoming tracks
-      pc.onaddstream = (event) => {
-        console.log("onaddstream event received:", event.stream);
-        setRemoteStream(event.stream);
-        setIsStreaming(true);
-        setIsConnecting(false);
-        console.log("Remote stream set successfully");
+      (pc as any).ontrack = (event: any) => {
+        if (event.streams && event.streams.length > 0) {
+          const stream = event.streams[0];
+          setRemoteStream(stream);
+          setIsStreaming(true);
+          setIsConnecting(false);
+          console.log("Remote stream set successfully");
+        }
+
+        // Handle track events
+        event.track.onmute = () => {
+          console.log(`${event.track.kind} track muted`);
+        };
+        event.track.onunmute = () => {
+          console.log(`${event.track.kind} track unmuted`);
+        };
       };
 
       // Handle data channel messages
-      pc.ondatachannel = (event) => {
+      (pc as any).ondatachannel = (event: any) => {
         console.log("Data channel opened:", event.channel.label);
 
         if (event.channel.label === "isPlaybackFinished") {
-          event.channel.onmessage = (event) => {
-            console.log("Playback finished:", event.data);
-            if (event.data === "true") {
+          event.channel.onmessage = (msgEvent: any) => {
+            console.log("Playback finished:", msgEvent.data);
+            if (msgEvent.data === "true") {
               stopStream();
             }
           };
         }
 
         if (event.channel.label === "chat") {
-          event.channel.onmessage = (event) => {
-            console.log("Data channel message received:", event.data);
-            setStreamTextResponse(event.data);
+          event.channel.onmessage = (msgEvent: any) => {
+            console.log("Data channel message received:", msgEvent.data);
+            setStreamTextResponse(msgEvent.data);
           };
         }
       };
 
       // Handle connection state changes
-      pc.onconnectionstatechange = () => {
-        console.log("Connection state:", pc.connectionState);
-        switch (pc.connectionState) {
+      (pc as any).onconnectionstatechange = () => {
+        console.log("Connection state:", (pc as any).connectionState);
+        switch ((pc as any).connectionState) {
           case "connected":
             setIsConnecting(false);
             break;
@@ -138,6 +148,8 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
       });
+
+      console.log("Created offer with audio and video support");
 
       try {
         await pc.setLocalDescription(offer);
@@ -180,7 +192,7 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
 
         await pc.setRemoteDescription(data.webrtc_offer);
         console.log("Connection established successfully");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error sending offer to server:", error);
         if (error.response) {
           console.error("Server response:", {
