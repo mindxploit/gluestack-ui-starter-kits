@@ -9,7 +9,7 @@ interface SignalingMessage {
   candidate?: RTCIceCandidateInit;
 }
 
-export function useStreamWebRTC(agentId: number) {
+export function useStreamWebRTC(agentId: number, sessionId: string) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [peerConnection, setPeerConnection] =
     useState<RTCPeerConnection | null>(null);
@@ -17,19 +17,6 @@ export function useStreamWebRTC(agentId: number) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [streamTextResponse, setStreamTextResponse] = useState<string | null>(null);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedSessionId = localStorage.getItem("sessionId");
-    if (storedSessionId) {
-      setSessionId(storedSessionId);
-    } else {
-      // Simple timestamp + random number based ID
-      const newId = Date.now().toString() + Math.floor(Math.random() * 1000000);
-      localStorage.setItem("sessionId", newId);
-      setSessionId(newId);
-    }
-  }, []);
 
   useEffect(() => {
     if (videoRef.current && isStreaming) {
@@ -301,6 +288,5 @@ export function useStreamWebRTC(agentId: number) {
     setStreamTextResponse,
     isAudioMuted,
     setIsAudioMuted,
-    sessionId,
   };
 }

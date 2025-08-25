@@ -4,18 +4,15 @@ import { router } from "expo-router";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { VStack } from "@/components/ui/vstack";
 const index = () => {
-  useEffect(() => {
-    router.push("tabs");
-  }, []);
   return (
     <SafeAreaView className="md:flex flex-col items-center justify-center md:w-full h-full">
       <VStack className="p-2 md:max-w-[440px] w-full" space="xl">
         <Button
           onPress={() => {
-            router.push("auth/splash-screen");
+            router.push("(tabs)/chat");
           }}
         >
-          <ButtonText>SplashScreen</ButtonText>
+          <ButtonText>chatjk</ButtonText>
         </Button>
         <Button
           className="w-full"

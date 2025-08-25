@@ -27,6 +27,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWebsocket } from "./streaming/useWebsocket";
 import { v4 as uuidv4 } from 'uuid';
 import * as Animatable from 'react-native-animatable';
+import { useStreamWebRTC } from "./streaming/useWebRTC";
+import { RTCView } from 'react-native-webrtc';
 
 
 
@@ -65,6 +67,7 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [displayedMessage, setDisplayedMessage] = useState<string>("");
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+
   useEffect(() => {
     processNextMessage();
   }, [messageQueue, isAnimating]);
@@ -76,7 +79,6 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
       setIsAnimating(true);
     }
   }
-
   const addMessageToChat = (message: string, fromMe: boolean) => {
     setChat((prevChat) => {
       if (!prevChat) return prevChat;
@@ -91,7 +93,16 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
     setMessageQueue((prevQueue) => [...prevQueue, { id: uuidv4(), message, sendAt: new Date(), fromMe }]);
   };
   const { onTextSubmit, lastMessageId } = useWebsocket(userId, avatarId, sessionId, setChat, addMessageToChat, addMessageToQueue);
+  const { remoteStream, isStreaming, isConnecting, streamTextResponse, isAudioMuted, setupStream } = useStreamWebRTC(Number(avatarId), sessionId);
 
+  useEffect(() => {
+    if (lastMessageId) {
+      console.log("Setting up stream", lastMessageId);
+      setupStream(lastMessageId);
+    }
+  }, [lastMessageId]);
+
+  // Animations
   const anim = useSharedValue(1);
   const dragY = useSharedValue(0);
 
@@ -159,7 +170,15 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
     <View style={styles.container}>
       <GestureDetector gesture={Gesture.Exclusive(tap, dragGesture)}>
         <Animated.View style={[styles.chatContainer, chatStyle]}>
-          <Image alt={avatar.name} source={avatar.video} className="w-full h-full absolute object-cover" />
+          {isStreaming && remoteStream ? (
+            <RTCView
+              streamURL={remoteStream.toURL()}
+              style={{ width: '100%', height: '100%', position: 'absolute' }}
+              objectFit="cover"
+            />
+          ) : (
+            <Image alt={avatar.name} source={avatar.video} className="w-full h-full absolute object-cover" />
+          )}
 
           <Animated.View style={hiddenStyle}>
             <VStack space="md" className="w-full px-4 pb-4" style={{ marginBottom: tabBarHeight, justifyContent: 'center', height: heightWithoutTabBar }}>
