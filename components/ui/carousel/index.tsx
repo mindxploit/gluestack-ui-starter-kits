@@ -30,7 +30,7 @@ const CarouselAvatars = () => {
     player.loop = true;
     player.muted = true;
     player.play();
-  });
+  })
 
   const data = [
     {

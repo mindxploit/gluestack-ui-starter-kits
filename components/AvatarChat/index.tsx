@@ -8,7 +8,7 @@ import { Badge, BadgeText } from "@/components/ui/badge";
 import { HStack } from "@/components/ui/hstack";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import 'react-native-get-random-values';
 import { Dimensions, Pressable } from 'react-native';
@@ -63,6 +63,19 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
   const [chat, setChat] = useState<IChat>({ id: 0, avatar_agent_id: "", image: "", name: "", messages: [] });
   const [messageQueue, setMessageQueue] = useState<IChatMessage[]>([]);
   const [inputValue, setInputValue] = useState<string>("");
+  const [displayedMessage, setDisplayedMessage] = useState<string>("");
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  useEffect(() => {
+    processNextMessage();
+  }, [messageQueue, isAnimating]);
+
+  const processNextMessage = () => {
+    if (messageQueue.length > 0 && !isAnimating) {
+      setDisplayedMessage(messageQueue.slice(0, 3).map((message) => message.message).join(''));
+      setMessageQueue((prevMessageQueue) => prevMessageQueue.slice(3));
+      setIsAnimating(true);
+    }
+  }
 
   const addMessageToChat = (message: string, fromMe: boolean) => {
     setChat((prevChat) => {
@@ -176,12 +189,12 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                 keyboardVerticalOffset={0}
               >
                 <VStack style={{ height: heightWithoutInsets }} space="md" className="pb-2">
-                  {messageQueue.length > 0 && (
-                    <Animatable.View style={styles.messageQueue} animation="fadeIn" key={messageQueue.slice(-1)[0]?.id} duration={800}>
+                  {displayedMessage && (
+                    <Animatable.View style={styles.messageQueue} animation="fadeIn" key={displayedMessage} duration={1000} onAnimationEnd={() => setIsAnimating(false)}>
                       <BlurView intensity={90} style={[styles.blurContainer]}>
                         <Badge action="neutral" variant="solid" size="lg" className="rounded-full bg-transparent">
                           <BadgeText size="lg" className="font-bold">
-                            {messageQueue.slice(-1)[0]?.message}
+                            {displayedMessage}
                           </BadgeText>
                         </Badge>
                       </BlurView>

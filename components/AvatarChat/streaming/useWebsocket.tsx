@@ -50,11 +50,11 @@ const useWebsocket = (
 
     // Properly close existing connection
     if (websocket.current) {
-      if (websocket.current.readyState === WebSocket.OPEN ||
-        websocket.current.readyState === WebSocket.CONNECTING) {
+      if (websocket.current.readyState === WebSocket.OPEN) {
         websocket.current.close(1000, "New connection");
+        websocket.current = null;
+        return
       }
-      websocket.current = null;
     }
 
     // Create new socket connection

@@ -1066,7 +1066,7 @@ PODS:
     - React-debug
   - react-native-get-random-values (1.11.0):
     - React-Core
-  - react-native-keyboard-controller (1.18.4):
+  - react-native-keyboard-controller (1.18.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1766,7 +1766,7 @@ SPEC CHECKSUMS:
   React-logger: 780b9ee9cec7d44eabc4093de90107c379078cb6
   React-Mapbuffer: f544f00b98dbdd8cbae96dd2bdb8b47f719976e0
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
-  react-native-keyboard-controller: a720b2fba1d68a2262bcf244afba823d6b731ae7
+  react-native-keyboard-controller: fc50d8a97d560253e1634fa903d819fa99bc6ac5
   react-native-safe-area-context: df9763c5de6fa38883028e243a0b60123acb8858
   react-native-video: 061eb256514515409a396846bb79b88a8a38ae92
   React-nativeconfig: ba9a2e54e2f0882cf7882698825052793ed4c851

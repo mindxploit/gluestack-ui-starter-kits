@@ -5427,7 +5427,7 @@ expo-updates@~0.25.28:
 
 expo-video@^2.2.2:
   version "2.2.2"
-  resolved "https://registry.npmjs.org/expo-video/-/expo-video-2.2.2.tgz"
+  resolved "https://registry.yarnpkg.com/expo-video/-/expo-video-2.2.2.tgz#0bbdff0fee90b1b6338eb9fbc4f7816f81d5783c"
   integrity sha512-SJrW1CeiWO7WCaAVMbjqGlvOMJfU/x+d0g9izjsnEXdV/KE3NhuCI3Y/3zCcFiAoR+jrHEtlI8sPlkLx3dq8xw==
 
 expo-web-browser@~13.0.3:
