@@ -30,6 +30,7 @@ import * as Animatable from 'react-native-animatable';
 import { useStreamWebRTC } from "./streaming/useWebRTC";
 import { RTCView } from 'react-native-webrtc';
 import { ResizeMode, Video } from "expo-av";
+import { MicrophoneButton } from "./MicrophoneButton";
 
 
 
@@ -71,17 +72,6 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
   const [displayedMessage, setDisplayedMessage] = useState<string>("");
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-  useEffect(() => {
-    processNextMessage();
-  }, [messageQueue, isAnimating]);
-
-  const processNextMessage = () => {
-    if (messageQueue.length > 0 && !isAnimating) {
-      setDisplayedMessage(messageQueue.slice(0, 3).map((message) => message.message).join(''));
-      setMessageQueue((prevMessageQueue) => prevMessageQueue.slice(3));
-      setIsAnimating(true);
-    }
-  }
   const addMessageToChat = (message: string, fromMe: boolean) => {
     setChat((prevChat) => {
       if (!prevChat) return prevChat;
@@ -95,12 +85,25 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
   const addMessageToQueue = (message: string, fromMe: boolean) => {
     setMessageQueue((prevQueue) => [...prevQueue, { id: uuidv4(), message, sendAt: new Date(), fromMe }]);
   };
-  const { onTextSubmit, lastMessageId } = useWebsocket(userId, avatarId, sessionId, setChat, addMessageToChat, addMessageToQueue);
-  const { remoteStream, isStreaming, isConnecting, streamTextResponse, isAudioMuted, setupStream } = useStreamWebRTC(clientId, sessionId);
+
+  const { onTextSubmit, onAudioSubmit, lastMessageId } = useWebsocket(userId, avatarId, sessionId, setChat, addMessageToChat, addMessageToQueue);
+  const { remoteStream, isStreaming, setupStream } = useStreamWebRTC(clientId, sessionId);
+
+  useEffect(() => {
+    processNextMessage();
+  }, [messageQueue, isAnimating, isStreaming]);
+
+  const processNextMessage = () => {
+    if (messageQueue.length > 0 && !isAnimating && isStreaming) {
+      setDisplayedMessage(messageQueue.slice(0, 3).map((message) => message.message).join(''));
+      setMessageQueue((prevMessageQueue) => prevMessageQueue.slice(3));
+      setIsAnimating(true);
+    }
+  }
 
   useEffect(() => {
     if (lastMessageId) {
-      console.log("Setting up stream", lastMessageId);
+      console.log("Calling webRTC setupStream", lastMessageId);
       setupStream(lastMessageId);
     }
   }, [lastMessageId]);
@@ -224,7 +227,8 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                 keyboardVerticalOffset={0}
               >
                 <VStack style={{ height: heightWithoutInsets }} space="md" className="pb-2">
-                  {displayedMessage && (
+                  {/* TODO: add back message display with timing later on */}
+                  {/* {displayedMessage && (
                     <Animatable.View style={styles.messageQueue} animation="fadeIn" key={displayedMessage} duration={1000} onAnimationEnd={() => setIsAnimating(false)}>
                       <BlurView intensity={90} style={[styles.blurContainer]}>
                         <Badge action="neutral" variant="solid" size="lg" className="rounded-full bg-transparent">
@@ -234,7 +238,7 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                         </Badge>
                       </BlurView>
                     </Animatable.View>
-                  )}
+                  )} */}
                   <ScrollView
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
@@ -242,7 +246,10 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                   >
                     {suggestions.map((suggestion, index) => (
                       // @ts-ignore
-                      <BlurView intensity={90} style={[styles.blurContainer, { alignSelf: "flex-end" }]}>
+                      <BlurView onPress={() => {
+                        onTextSubmit(suggestion)
+                        setInputValue("")
+                      }} intensity={90} style={[styles.blurContainer, { alignSelf: "flex-end" }]}>
                         <Badge action="neutral" variant="outline" size="lg" className="bg-transparent rounded-full">
                           <BadgeText size="sm">
                             <Text>{suggestion}</Text>
@@ -252,23 +259,34 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                     ))}
                   </ScrollView>
 
-                  {/* @ts-ignore */}
-                  <BlurView intensity={90} style={styles.blurContainer}>
-                    <Input variant="rounded" size="xl" isDisabled={false} isInvalid={false} isReadOnly={false} className="border-background-300">
-                      <InputField
-                        placeholder='Ask me anything...'
-                        onSubmitEditing={() => {
-                          onTextSubmit(inputValue)
-                          setInputValue("")
-                        }}
-                        onChangeText={(text) => setInputValue(text)}
-                        value={inputValue}
-                      />
-                      <InputSlot className="px-3">
-                        <MaterialIcons name="send" size={24} className="text-background-300" />
-                      </InputSlot>
-                    </Input>
-                  </BlurView>
+                  {/* Chat Input Section */}
+                  <HStack space="md" className="items-center">
+                    {/* @ts-ignore */}
+                    <BlurView intensity={90} style={[styles.blurContainer, { flex: 1 }]}>
+                      <Input variant="rounded" size="xl" isDisabled={false} isInvalid={false} isReadOnly={false} className="border-background-300">
+                        <InputField
+                          placeholder='Ask me anything...'
+                          onSubmitEditing={() => {
+                            onTextSubmit(inputValue)
+                            setInputValue("")
+                          }}
+                          onChangeText={(text) => setInputValue(text)}
+                          value={inputValue}
+                        />
+                        <InputSlot className="px-3">
+                          <MaterialIcons name="send" size={24} className="text-background-300" />
+                        </InputSlot>
+                      </Input>
+                    </BlurView>
+
+                    {/* <MicrophoneButton
+                      onAudioData={(audioData) => {
+                        console.log('🎤 Received audio data, sending via WebSocket...');
+                        onAudioSubmit(audioData);
+                      }}
+                      size={50}
+                    /> */}
+                  </HStack>
                 </VStack>
               </KeyboardAvoidingView>
             </VStack>

@@ -96,28 +96,25 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
       }
       // ---------------------------------
 
-      // --- Explicitly add transceivers before offer --- Forces proper setup
-      pc.addTransceiver("audio", { direction: "recvonly" });
-      pc.addTransceiver("video", { direction: "recvonly" });
-      console.log("Audio and video transceivers added.");
-      // ------------------------------------------------
 
       // Handle incoming tracks
       (pc as any).ontrack = (event: any) => {
         if (event.streams && event.streams.length > 0) {
           const stream = event.streams[0];
           setRemoteStream(stream);
-          setIsStreaming(true);
           setIsConnecting(false);
           console.log("Remote stream set successfully");
         }
 
         // Handle track events
         event.track.onmute = () => {
-          // console.log(`${event.track.kind} track muted`);
+          console.log(`${event.track.kind} track muted`);
         };
         event.track.onunmute = () => {
-          // console.log(`${event.track.kind} track unmuted`);
+          console.log(`${event.track.kind} track unmuted`);
+        };
+        event.track.onended = () => {
+          console.log(`${event.track.kind} track ended`);
         };
       };
 
@@ -125,19 +122,22 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
       (pc as any).ondatachannel = (event: any) => {
         console.log("Data channel opened:", event.channel.label);
 
-        if (event.channel.label === "isPlaybackFinished") {
+        // see if video is actually playing
+        if (event.channel.label === "isPlaybackStarted") {
           event.channel.onmessage = (event: any) => {
-            console.log("Playback finished:", event.data);
             if (event.data === "true") {
-              stopStream();
+              console.log("Playback started");
+              setIsStreaming(true);
             }
           };
         }
 
-        if (event.channel.label === "chat") {
+        if (event.channel.label === "isPlaybackFinished") {
           event.channel.onmessage = (event: any) => {
-            console.log("Data channel message received:", event.data);
-            setStreamTextResponse(event.data);
+            if (event.data === "true") {
+              console.log("Playback finished");
+              stopStream();
+            }
           };
         }
       };
@@ -217,8 +217,7 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
         });
 
         await pc.setRemoteDescription(data.webrtc_offer);
-        console.log("Connection established successfully");
-        console.log("🔍 Remote description set - waiting for data channels from server...");
+        console.log("Connection established successfully 💪🏻");
       } catch (error: any) {
         console.error("Error sending offer to server:", error);
         if (error.response) {
