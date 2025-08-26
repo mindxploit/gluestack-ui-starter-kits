@@ -86,6 +86,22 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
         ],
       });
 
+      // --- Data Channel Trick ---
+      // Create a dummy data channel before creating the offer (needed for compatibility)
+      try {
+        pc.createDataChannel("dummy");
+        console.log("Dummy data channel created.");
+      } catch (e) {
+        console.error("Failed to create dummy data channel:", e);
+      }
+      // ---------------------------------
+
+      // --- Explicitly add transceivers before offer --- Forces proper setup
+      pc.addTransceiver("audio", { direction: "recvonly" });
+      pc.addTransceiver("video", { direction: "recvonly" });
+      console.log("Audio and video transceivers added.");
+      // ------------------------------------------------
+
       // Handle incoming tracks
       (pc as any).ontrack = (event: any) => {
         if (event.streams && event.streams.length > 0) {
@@ -98,31 +114,41 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
 
         // Handle track events
         event.track.onmute = () => {
-          console.log(`${event.track.kind} track muted`);
+          // console.log(`${event.track.kind} track muted`);
         };
         event.track.onunmute = () => {
-          console.log(`${event.track.kind} track unmuted`);
+          // console.log(`${event.track.kind} track unmuted`);
         };
       };
 
-      // Handle data channel messages
+      // Handle data channel messages - exact same as web version
       (pc as any).ondatachannel = (event: any) => {
         console.log("Data channel opened:", event.channel.label);
 
         if (event.channel.label === "isPlaybackFinished") {
-          event.channel.onmessage = (msgEvent: any) => {
-            console.log("Playback finished:", msgEvent.data);
-            if (msgEvent.data === "true") {
+          event.channel.onmessage = (event: any) => {
+            console.log("Playback finished:", event.data);
+            if (event.data === "true") {
               stopStream();
             }
           };
         }
 
         if (event.channel.label === "chat") {
-          event.channel.onmessage = (msgEvent: any) => {
-            console.log("Data channel message received:", msgEvent.data);
-            setStreamTextResponse(msgEvent.data);
+          event.channel.onmessage = (event: any) => {
+            console.log("Data channel message received:", event.data);
+            setStreamTextResponse(event.data);
           };
+        }
+      };
+
+      // Collect candidates (trickle ICE is implicitly handled by the server)
+      (pc as any).onicecandidate = (event: any) => {
+        if (event.candidate) {
+          console.log("Local ICE candidate gathered:", event.candidate.candidate.substring(0, 30) + "...");
+          // Server handles trickle ICE
+        } else {
+          console.log("ICE gathering complete");
         }
       };
 
@@ -192,6 +218,7 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
 
         await pc.setRemoteDescription(data.webrtc_offer);
         console.log("Connection established successfully");
+        console.log("🔍 Remote description set - waiting for data channels from server...");
       } catch (error: any) {
         console.error("Error sending offer to server:", error);
         if (error.response) {

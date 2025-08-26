@@ -29,6 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as Animatable from 'react-native-animatable';
 import { useStreamWebRTC } from "./streaming/useWebRTC";
 import { RTCView } from 'react-native-webrtc';
+import { ResizeMode, Video } from "expo-av";
 
 
 
@@ -167,22 +168,35 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
 
   const heightWithoutTabBar = SCREEN_HEIGHT - tabBarHeight
   const heightWithoutInsets = SCREEN_HEIGHT - tabBarHeight - insets.top - insets.bottom
+  const videoUrl = "https://api.cogit-lab.com/documents/idle_video/3ddba8f5-0d2c-4932-a172-09986ee12c3c_cropped_resized_idle.mp4"
 
   return (
     <View style={styles.container}>
       <GestureDetector gesture={Gesture.Exclusive(tap, dragGesture)}>
         <Animated.View style={[styles.chatContainer, chatStyle]}>
-          {isStreaming && remoteStream ? (
+          {isStreaming && remoteStream && (
             <RTCView
               streamURL={remoteStream.toURL()}
-              style={{ width: '100%', height: '100%', position: 'absolute' }}
+              style={{ width: '100%', height: '100%', position: 'absolute', zIndex: 99 }}
               objectFit="cover"
             />
-          ) : (
-            <Image alt={avatar.name} source={avatar.video} className="w-full h-full absolute object-cover" />
           )}
+          {/* video fallback bg */}
+          <Video
+            source={{ uri: videoUrl }}
+            shouldPlay={true}
+            isLooping={true}
+            isMuted={true}
+            resizeMode={ResizeMode.COVER}
+            style={{
+              width: SCREEN_WIDTH,
+              height: SCREEN_HEIGHT,
+              position: 'absolute',
+              zIndex: 1,
+            }}
+          />
 
-          <Animated.View style={hiddenStyle}>
+          <Animated.View style={[hiddenStyle, { zIndex: 100 }]}>
             <VStack space="md" className="w-full px-4 pb-4" style={{ marginBottom: tabBarHeight, justifyContent: 'center', height: heightWithoutTabBar }}>
               <HStack className="justify-between" style={{ marginTop: insets.top }}>
                 <Animated.View style={[hiddenStyle]}>
