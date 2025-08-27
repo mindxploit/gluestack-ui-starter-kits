@@ -65,6 +65,7 @@ const useWebsocket = (
     // Handle connection
     websocket.current.onopen = () => {
       console.log("👍🏻 [Socket] Connected to server");
+      console.log("🔗 [Socket] WebSocket state:", websocket.current?.readyState);
       startWsSession(sessionId, agentId);
       setIsConnected(true);
     };
@@ -77,22 +78,27 @@ const useWebsocket = (
 
     // Handle incoming messages
     websocket.current.onmessage = (event: MessageEvent) => {
-      const messageFromServer = JSON.parse(event.data);
-      // Check if turn is complete
-      if (messageFromServer.turn_complete && messageFromServer.turn_complete === true) {
-        setLastMessageId(messageFromServer.id_msg);
-      }
+      try {
+        const messageFromServer = JSON.parse(event.data);
 
-      // Handle user input text (transcribed from audio)
-      if (messageFromServer.mime_type === "text/plain/input") {
-        console.log("📝 [Socket] User input text:", messageFromServer.data);
-        addMessageToChat(messageFromServer.data, true);
-      }
+        // Check if turn is complete
+        if (messageFromServer.turn_complete && messageFromServer.turn_complete === true) {
+          setLastMessageId(messageFromServer.id_msg);
+        }
 
-      // Handle text response from agent
-      if (messageFromServer.mime_type === "text/plain/output") {
-        console.log("📝 [Socket] Agent response:", messageFromServer.data);
-        addMessageToQueue(messageFromServer.data, false);
+        // Handle user input text (transcribed from audio)
+        if (messageFromServer.mime_type === "text/plain/input") {
+          console.log("📝 [Socket] User input text:", messageFromServer.data);
+          addMessageToChat(messageFromServer.data, true);
+        }
+
+        // Handle text response from agent
+        if (messageFromServer.mime_type === "text/plain/output") {
+          console.log("📝 [Socket] Agent response:", messageFromServer.data);
+          addMessageToQueue(messageFromServer.data, false);
+        }
+      } catch (error) {
+        console.error("❌ [Socket] Error parsing message:", error, "Raw data:", event.data);
       }
     };
 
@@ -131,6 +137,23 @@ const useWebsocket = (
     return true;
   }, [sessionId, agentId, userId, addMessageToChat]);
 
+  // Send audio message
+  const onAudioSubmit = useCallback((audioData: string) => {
+    if (!audioData || !websocket.current) {
+      return false;
+    }
+
+    const audioMessage = {
+      mime_type: "audio/pcm",
+      data: audioData,
+    };
+
+    websocket.current.send(JSON.stringify(audioMessage));
+    console.log("✅ [Audio] Audio message sent successfully");
+
+    return true;
+  }, [sessionId, agentId, userId]);
+
   // Cleanup function
   const cleanup = useCallback(() => {
     console.log("🧹 [Socket] Starting cleanup...");
@@ -154,6 +177,7 @@ const useWebsocket = (
 
   return {
     onTextSubmit,
+    onAudioSubmit,
     cleanup,
     isConnected,
     sessionId,

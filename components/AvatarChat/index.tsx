@@ -279,13 +279,13 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
                       </Input>
                     </BlurView>
 
-                    {/* <MicrophoneButton
+                    <MicrophoneButton
                       onAudioData={(audioData) => {
                         console.log('🎤 Received audio data, sending via WebSocket...');
                         onAudioSubmit(audioData);
                       }}
                       size={50}
-                    /> */}
+                    />
                   </HStack>
                 </VStack>
               </KeyboardAvoidingView>
