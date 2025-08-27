@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Audio } from "expo-av";
 import * as FileSystem from 'expo-file-system';
 
@@ -12,9 +12,25 @@ export const useMicrophone = ({ onAudioData }: { onAudioData: (audioData: string
     setIsPermissionGranted(status === 'granted');
   };
 
+  const sendInChunks = async (interval: number) => {
+    if (recording && isRecording) {
+      setTimeout(async () => {
+        await stopAndSendRecording();
+      }, interval);
+    } else {
+      startRecording();
+    }
+  }
+
+  useEffect(() => {
+    sendInChunks(3000);
+  }, [recording]);
+
   const startRecording = async () => {
-    // If already recording, do nothing
-    if (isRecording) return;
+    if (recording) {
+      await stopAndSendRecording();
+      await startRecording();
+    }
 
     try {
       await Audio.setAudioModeAsync({
@@ -56,31 +72,36 @@ export const useMicrophone = ({ onAudioData }: { onAudioData: (audioData: string
     }
   };
 
-  const stopRecording = async () => {
+  const sendRecording = async () => {
+    if (!recording) return;
+    const uri = recording.getURI();
+
+    if (uri) {
+      // Convert audio file to base64
+      const base64Audio = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Send the base64 audio data
+      onAudioData(base64Audio);
+
+      // Clean up 
+      await FileSystem.deleteAsync(uri, { idempotent: true });
+      setRecording(null);
+    }
+  }
+
+  const stopAndSendRecording = async () => {
     try {
       if (!recording) return;
+      console.log('stopping and sending recording ...');
+      console.log(recording.getURI());
 
       await recording.stopAndUnloadAsync();
       setIsRecording(false);
 
-      // Get the recording URI
-      const uri = recording.getURI();
+      await sendRecording();
 
-      if (uri) {
-        // Convert audio file to base64
-        const base64Audio = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        // Send the base64 audio data
-        onAudioData(base64Audio);
-
-        // Clean up the temporary file
-        await FileSystem.deleteAsync(uri, { idempotent: true });
-      }
-
-      // Clear the recording object
-      setRecording(null);
     } catch (error) {
       console.error('Error stopping recording:', error);
       // Even on error, clear the recording object
@@ -88,26 +109,11 @@ export const useMicrophone = ({ onAudioData }: { onAudioData: (audioData: string
     }
   };
 
-  const cleanup = async () => {
-    console.log('🧹 Cleaning up microphone...');
-    try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-      }
-    } catch (error) {
-      console.error('Error during cleanup:', error);
-    } finally {
-      setRecording(null);
-      setIsRecording(false);
-    }
-  }
-
   return {
     isRecording,
     isPermissionGranted,
     startRecording,
-    stopRecording,
+    stopAndSendRecording,
     requestPermissions,
-    cleanup,
   };
 };

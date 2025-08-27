@@ -28,9 +28,8 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({
     isRecording,
     isPermissionGranted,
     startRecording,
-    stopRecording,
+    stopAndSendRecording,
     requestPermissions,
-    cleanup,
   } = useMicrophone({
     onAudioData,
   });
@@ -72,13 +71,6 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({
     requestPermissions();
   }, []);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      cleanup();
-    };
-  }, []);
-
   const handlePressIn = async () => {
     if (disabled) return;
 
@@ -91,8 +83,8 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({
   };
 
   const handlePressOut = async () => {
-    if (disabled) return;
-    await stopRecording();
+    // if (disabled) return;
+    // await stopAndSendRecording();
   };
 
   const getButtonColor = () => {

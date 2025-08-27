@@ -65,10 +65,7 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
   // Setup WebRTC connection
   const setupStream = async (msgId: string) => {
     try {
-      // Clear existing stream before setting up a new one
-      if (peerConnection) {
-        peerConnection.close();
-      }
+      console.log("Setting up WebRTC stream... with msgId:", msgId);
       stopStream();
       setIsConnecting(true);
 
