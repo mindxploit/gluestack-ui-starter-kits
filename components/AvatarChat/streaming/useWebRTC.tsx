@@ -103,18 +103,18 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
           const stream = event.streams[0];
           setRemoteStream(stream);
           setIsConnecting(false);
-          console.log("Remote stream set successfully");
+          // console.log("Remote stream set successfully");
         }
 
         // Handle track events
         event.track.onmute = () => {
-          console.log(`${event.track.kind} track muted`);
+          // console.log(`${event.track.kind} track muted`);
         };
         event.track.onunmute = () => {
-          console.log(`${event.track.kind} track unmuted`);
+          // console.log(`${event.track.kind} track unmuted`);
         };
         event.track.onended = () => {
-          console.log(`${event.track.kind} track ended`);
+          // console.log(`${event.track.kind} track ended`);
         };
       };
 

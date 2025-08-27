@@ -32,9 +32,7 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({
     requestPermissions,
     cleanup,
   } = useMicrophone({
-    onAudioData: (audioData: any) => {
-      onAudioData(audioData);
-    },
+    onAudioData,
   });
 
   // Animation for recording state
