@@ -39,6 +39,7 @@ interface AvatarChatProps {
     name: string;
     description: string;
     video: string;
+    clientId: number;
   };
   suggestions: string[];
 }
@@ -62,9 +63,10 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const userId = "1";
 const sessionId = "1754562753365441185";
+
+// we should get that from the backend
 const avatarId = "3ddba8f5-0d2c-4932-a172-09986ee12c3c";
-// hardcoded agentica for now
-const clientId = 20
+
 export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
   const [chat, setChat] = useState<IChat>({ id: 0, avatar_agent_id: "", image: "", name: "", messages: [] });
   const [messageQueue, setMessageQueue] = useState<IChatMessage[]>([]);
@@ -86,7 +88,7 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
     setMessageQueue((prevQueue) => [...prevQueue, { id: uuidv4(), message, sendAt: new Date(), fromMe }]);
   };
 
-  const { remoteStream, isStreaming, setupStream } = useStreamWebRTC(clientId, sessionId);
+  const { remoteStream, isStreaming, setupStream } = useStreamWebRTC(avatar.clientId, sessionId);
   const { onTextSubmit, onAudioSubmit, lastMessageId } = useWebsocket(userId, avatarId, sessionId, setChat, addMessageToChat, addMessageToQueue, isStreaming);
 
   useEffect(() => {

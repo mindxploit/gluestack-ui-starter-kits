@@ -123,7 +123,10 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
           event.channel.onmessage = (event: any) => {
             if (event.data === "true") {
               console.log("Playback started");
-              setIsStreaming(true);
+              // Slight delay for black frame
+              setTimeout(() => {
+                setIsStreaming(true);
+              }, 300);
             }
           };
         }
