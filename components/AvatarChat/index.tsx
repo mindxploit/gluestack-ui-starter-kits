@@ -86,8 +86,8 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
     setMessageQueue((prevQueue) => [...prevQueue, { id: uuidv4(), message, sendAt: new Date(), fromMe }]);
   };
 
-  const { onTextSubmit, onAudioSubmit, lastMessageId } = useWebsocket(userId, avatarId, sessionId, setChat, addMessageToChat, addMessageToQueue);
   const { remoteStream, isStreaming, setupStream } = useStreamWebRTC(clientId, sessionId);
+  const { onTextSubmit, onAudioSubmit, lastMessageId } = useWebsocket(userId, avatarId, sessionId, setChat, addMessageToChat, addMessageToQueue, isStreaming);
 
   useEffect(() => {
     processNextMessage();

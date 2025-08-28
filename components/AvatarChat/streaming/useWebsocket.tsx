@@ -23,6 +23,7 @@ const useWebsocket = (
   setMessages: React.Dispatch<React.SetStateAction<IChat>>,
   addMessageToChat: (message: string, fromMe: boolean) => void,
   addMessageToQueue: (message: string, fromMe: boolean) => void,
+  isStreaming: boolean,
 ) => {
   const [sessionId, setSessionId] = useState<string | null>(initialSessionId);
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -107,7 +108,7 @@ const useWebsocket = (
       console.error("❌ [Socket] Error:", error);
     };
 
-  }, [sessionId, agentId, userId, setMessages, addMessageToChat, addMessageToQueue]);
+  }, [sessionId, agentId, userId, setMessages, addMessageToChat, addMessageToQueue, isStreaming]);
 
   // Connect when session ID is available
   useEffect(() => {
@@ -137,9 +138,9 @@ const useWebsocket = (
     return true;
   }, [sessionId, agentId, userId, addMessageToChat]);
 
-  // Send audio message
   const onAudioSubmit = useCallback((audioData: string) => {
-    if (!audioData || !websocket.current) {
+    // Don't send audio if video is playing. No interruptions.
+    if (!audioData || !websocket.current || isStreaming) {
       return false;
     }
 
@@ -152,7 +153,7 @@ const useWebsocket = (
     console.log("✅ [Audio] Audio message sent successfully");
 
     return true;
-  }, [sessionId, agentId, userId]);
+  }, [sessionId, agentId, userId, isStreaming]);
 
   // Cleanup function
   const cleanup = useCallback(() => {

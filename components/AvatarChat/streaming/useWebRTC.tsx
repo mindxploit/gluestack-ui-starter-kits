@@ -20,7 +20,6 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [streamTextResponse, setStreamTextResponse] = useState<string | null>(null);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
 
   const stopStream = () => {
@@ -251,8 +250,6 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
     stopStream,
     isConnecting,
     processSignaling,
-    streamTextResponse,
-    setStreamTextResponse,
     isAudioMuted,
     setIsAudioMuted,
   };
