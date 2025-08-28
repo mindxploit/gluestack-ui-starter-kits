@@ -281,7 +281,6 @@ export const AvatarChat = ({ avatar, suggestions }: AvatarChatProps) => {
 
                     <MicrophoneButton
                       onAudioData={(audioData) => {
-                        console.log('🎤 Received audio data, sending via WebSocket...');
                         onAudioSubmit(audioData);
                       }}
                       size={50}

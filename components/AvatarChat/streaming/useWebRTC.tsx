@@ -142,8 +142,6 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
       // Collect candidates (trickle ICE is implicitly handled by the server)
       (pc as any).onicecandidate = (event: any) => {
         if (event.candidate) {
-          console.log("Local ICE candidate gathered:", event.candidate.candidate.substring(0, 30) + "...");
-          // Server handles trickle ICE
         } else {
           console.log("ICE gathering complete");
         }
@@ -189,8 +187,6 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
         const finalSdp = pc.localDescription?.sdp;
         const finalType = pc.localDescription?.type;
 
-        console.log("Final SDP length after wait:", finalSdp?.length);
-
         if (!finalSdp || !finalType) {
           throw new Error(
             `Invalid local description after ICE gathering wait: SDP length ${finalSdp?.length}, type ${finalType}`
@@ -202,7 +198,6 @@ export function useStreamWebRTC(agentId: number, sessionId: string) {
           session_id: sessionId,
           client_id: agentId ?? 101,
           sdp_length: finalSdp?.length,
-          type: finalType
         });
 
         const { data } = await axios.post(`https://inference.cogit-lab.com/inferenceRT/handle_live`, {

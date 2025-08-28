@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Audio } from "expo-av";
 import * as FileSystem from 'expo-file-system';
 
@@ -7,45 +7,91 @@ export const useMicrophone = ({ onAudioData }: { onAudioData: (audioData: string
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
 
+  // Use refs to avoid stale closures and manage intervals
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const chunkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isRecordingRef = useRef(false);
+
+  // Update refs when state changes
+  useEffect(() => {
+    recordingRef.current = recording;
+    isRecordingRef.current = isRecording;
+  }, [recording, isRecording]);
+
   const requestPermissions = async () => {
     const { status } = await Audio.requestPermissionsAsync();
     setIsPermissionGranted(status === 'granted');
   };
 
-  const sendInChunks = async (interval: number) => {
-    if (recording && isRecording) {
-      setTimeout(async () => {
-        await stopAndSendRecording();
-      }, interval);
-    } else {
-      startRecording();
-    }
-  }
-
-  useEffect(() => {
-    sendInChunks(3000);
-  }, [recording]);
-
   const startRecording = async () => {
-    if (recording) {
-      await stopAndSendRecording();
-      await startRecording();
-    }
-
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
 
-      const recordingOptions = {
+      await startNewRecordingChunk()
+      setIsRecording(true);
+
+      startChunkSendingTimer();
+    } catch (error) {
+      console.error('Error starting recording:', error);
+    }
+  };
+
+  const startChunkSendingTimer = useCallback(() => {
+    // Clear any existing timer
+    if (chunkIntervalRef.current) {
+      clearInterval(chunkIntervalRef.current);
+    }
+
+    // Send chunks every second
+    chunkIntervalRef.current = setInterval(async () => {
+      if (isRecordingRef.current && recordingRef.current) {
+        await sendCurrentChunk();
+      }
+    }, 1000);
+  }, []);
+
+  const sendCurrentChunk = async () => {
+    if (!recordingRef.current) return;
+
+    try {
+      // Stop current recording to get the chunk
+      await recordingRef.current.stopAndUnloadAsync();
+
+      const uri = recordingRef.current.getURI();
+      if (uri) {
+        // Convert to base64 and send
+        const base64Audio = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        onAudioData(base64Audio);
+
+        // Clean up the chunk file
+        await FileSystem.deleteAsync(uri, { idempotent: true });
+      }
+
+      // Start a new recording immediately for the next chunk
+      await startNewRecordingChunk();
+    } catch (error) {
+      console.error('Error sending chunk:', error);
+      // Try to restart recording on error
+      await startNewRecordingChunk();
+    }
+  };
+
+  const startNewRecordingChunk = async () => {
+    try {
+      const { recording: newRecording } = await Audio.Recording.createAsync({
         android: {
           extension: '.pcm',
           outputFormat: Audio.AndroidOutputFormat.DEFAULT,
           audioEncoder: Audio.AndroidAudioEncoder.DEFAULT,
           sampleRate: 16000,
           numberOfChannels: 1,
-          bitRate: 256000, // 16-bit * 16kHz * 1 channel
+          bitRate: 256000,
         },
         ios: {
           extension: '.pcm',
@@ -53,7 +99,7 @@ export const useMicrophone = ({ onAudioData }: { onAudioData: (audioData: string
           audioQuality: Audio.IOSAudioQuality.HIGH,
           sampleRate: 16000,
           numberOfChannels: 1,
-          bitRate: 256000, // 16-bit * 16kHz * 1 channel
+          bitRate: 256000,
           linearPCMBitDepth: 16,
           linearPCMIsBigEndian: false,
           linearPCMIsFloat: false,
@@ -62,58 +108,59 @@ export const useMicrophone = ({ onAudioData }: { onAudioData: (audioData: string
           mimeType: 'audio/pcm',
           bitsPerSecond: 256000,
         },
-      };
-
-      const { recording } = await Audio.Recording.createAsync(recordingOptions);
-      setIsRecording(true);
-      setRecording(recording);
-    } catch (error) {
-      console.error('Error starting recording:', error);
-    }
-  };
-
-  const sendRecording = async () => {
-    if (!recording) return;
-    const uri = recording.getURI();
-
-    if (uri) {
-      // Convert audio file to base64
-      const base64Audio = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
       });
 
-      // Send the base64 audio data
-      onAudioData(base64Audio);
-
-      // Clean up 
-      await FileSystem.deleteAsync(uri, { idempotent: true });
-      setRecording(null);
+      setRecording(newRecording);
+    } catch (error) {
+      console.error('Error starting new chunk recording:', error);
     }
-  }
+  };
 
-  const stopAndSendRecording = async () => {
+  const stopRecording = async () => {
     try {
-      if (!recording) return;
-      console.log('stopping and sending recording ...');
-      console.log(recording.getURI());
+      // Clear the chunking timer
+      if (chunkIntervalRef.current) {
+        clearInterval(chunkIntervalRef.current);
+        chunkIntervalRef.current = null;
+      }
 
-      await recording.stopAndUnloadAsync();
+      if (recordingRef.current) {
+        await recordingRef.current.stopAndUnloadAsync();
+
+        // Send the final chunk
+        const uri = recordingRef.current.getURI();
+        if (uri) {
+          const base64Audio = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          onAudioData(base64Audio);
+          await FileSystem.deleteAsync(uri, { idempotent: true });
+        }
+      }
+
       setIsRecording(false);
-
-      await sendRecording();
-
+      setRecording(null);
     } catch (error) {
       console.error('Error stopping recording:', error);
-      // Even on error, clear the recording object
+      setIsRecording(false);
       setRecording(null);
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (chunkIntervalRef.current) {
+        clearInterval(chunkIntervalRef.current);
+      }
+    };
+  }, []);
 
   return {
     isRecording,
     isPermissionGranted,
     startRecording,
-    stopAndSendRecording,
+    stopRecording,
     requestPermissions,
   };
 };

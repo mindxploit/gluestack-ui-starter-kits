@@ -28,7 +28,7 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({
     isRecording,
     isPermissionGranted,
     startRecording,
-    stopAndSendRecording,
+    stopRecording,
     requestPermissions,
   } = useMicrophone({
     onAudioData,
@@ -79,7 +79,11 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({
       return;
     }
 
-    await startRecording();
+    if (isRecording) {
+      await stopRecording();
+    } else {
+      await startRecording();
+    }
   };
 
   const handlePressOut = async () => {
